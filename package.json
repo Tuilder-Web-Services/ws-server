@@ -2,8 +2,8 @@
   "name": "@tuilder/ws-server",
   "version": "0.0.3",
   "description": "Websocket Server Boilerplate",
-  "main": "./lib/cjs/index.js",
-  "types": "./lib/cjs/types/index.d.ts",
+  "main": "./lib/esm/index.mjs",
+  "types": "./lib/esm/types/index.d.ts",
   "type": "module",
   "exports": {
     ".": {
