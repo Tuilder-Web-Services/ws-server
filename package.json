@@ -1,6 +1,6 @@
 {
   "name": "@tuilder/ws-server",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Websocket Server Boilerplate",
   "main": "./lib/index.js",
   "module": "./lib/index.mjs",
