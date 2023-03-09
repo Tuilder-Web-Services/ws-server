@@ -1,4 +1,4 @@
-import ws from 'ws'
+import * as ws from 'ws'
 import { Socket } from 'net'
 import * as ipaddr from 'ipaddr.js'
 import { nanoid } from 'nanoid'
