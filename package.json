@@ -12,6 +12,9 @@
       "types": "./lib/index.d.ts"
     }
   },
+  "files": [
+    "lib/**/*"
+  ],
   "scripts": {
     "build": "tsup",
     "watch": "npm run build -- --watch src",
