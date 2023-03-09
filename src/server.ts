@@ -1,4 +1,4 @@
-import { Server, ServerOptions, WebSocket } from 'ws';
+import WebSocket, { ServerOptions, WebSocketServer } from 'ws';
 import { Socket } from 'net'
 import * as ipaddr from 'ipaddr.js'
 import { nanoid } from 'nanoid'
@@ -27,12 +27,12 @@ export class WsServer {
   }
 
   options: IWsServerOptions
-  server: Server
+  server: WebSocketServer
   clients: Set<IWsClient> = new Set()
 
   constructor(options: IWsServerOptions = {}) {
     this.options = { ...this.defaultOptions, ...options }
-    this.server = new Server(this.options)
+    this.server = new WebSocketServer(this.options)
     this.server.on('connection', async (socket, req) => this.onConnection(socket, req))
   }
 
