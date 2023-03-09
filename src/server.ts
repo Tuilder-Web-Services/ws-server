@@ -1,4 +1,4 @@
-import * as ws from 'ws'
+import { Server, ServerOptions, WebSocket } from 'ws';
 import { Socket } from 'net'
 import * as ipaddr from 'ipaddr.js'
 import { nanoid } from 'nanoid'
@@ -7,13 +7,13 @@ import { IWsRoute } from './router'
 
 type TWsRoute<TData = any> = new (client: any, message: any) => IWsRoute<TData>;
 
-export interface IWsServerOptions extends ws.ServerOptions {
+export interface IWsServerOptions extends ServerOptions {
   routes?: Record<string, TWsRoute>
 }
 
 export interface IWsClient {
   id: string
-  socket: ws.WebSocket,
+  socket: WebSocket,
   sessionId?: string,
   ipAddress?: string
   subscribedTo: string[]
@@ -27,16 +27,16 @@ export class WsServer {
   }
 
   options: IWsServerOptions
-  server: ws.Server
+  server: Server
   clients: Set<IWsClient> = new Set()
 
   constructor(options: IWsServerOptions = {}) {
     this.options = { ...this.defaultOptions, ...options }
-    this.server = new ws.Server(this.options)
+    this.server = new Server(this.options)
     this.server.on('connection', async (socket, req) => this.onConnection(socket, req))
   }
 
-  private onConnection(socket: ws.WebSocket, req: any) {
+  private onConnection(socket: WebSocket, req: any) {
     const ip = getIpFromConnection(req.socket)
 
     const client: IWsClient = {
