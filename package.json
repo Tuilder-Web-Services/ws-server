@@ -4,6 +4,7 @@
   "description": "Websocket Server Boilerplate",
   "typings": "./lib/index.d.ts",
   "module": "./lib/index.mjs",
+  "es2022": "./lib/index.mjs",
   "exports": {
     "./package.json": {
       "default": "./package.json"
@@ -11,7 +12,10 @@
     ".": {
       "types": "./lib/index.d.ts",
       "default": "./lib/index.mjs",
-      "node": "./lib/index.mjs"
+      "node": "./lib/index.mjs",
+      "import": "./lib/index.mjs",
+      "require": "./lib/index.js",
+      "es2022": "./lib/index.mjs"
     }
   },
   "files": [
