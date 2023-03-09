@@ -10,7 +10,8 @@ export default defineConfig({
   dts: {
     resolve: true,
     compilerOptions: {
-      moduleResolution: 'node'
+      moduleResolution: 'node',
+      lib: ['es2022', 'node'],
     }
   },
 })
