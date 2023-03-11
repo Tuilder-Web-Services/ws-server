@@ -43,7 +43,7 @@ export class WsServer {
   public clientRemoved: Subject<IWsClient> = new Subject<IWsClient>()
 
   private onConnection(socket: WebSocket, req: IncomingMessage) {
-    const ip = getIpFromConnection(req.socket)
+    const ip = (req.headers['x-forwarded-for'] ?? req.socket.remoteAddress) as string
 
     // get host name from req, replacing any non-alphanumeric characters with an underscore
     const host = (req.headers.host ?? 'localhost').replace(/[^a-z0-9]/gi, '_').toLowerCase()
@@ -85,21 +85,4 @@ export class WsServer {
     this.clients.delete(client)
     this.clientRemoved.next(client)
   }
-}
-
-const getIpFromConnection = (c: Socket) => {
-  const ipStr = c.remoteAddress || ''
-  if (isValid(ipStr)) {
-    try {
-      let addr = parse(ipStr)
-      if (IPv6.isValid(ipStr) && (addr as IPv6).isIPv4MappedAddress()) {
-        return (addr as IPv6).toIPv4Address().toString()
-      }
-      return addr.toNormalizedString()
-    } catch (e) {
-      console.error(e)
-      return ipStr
-    }
-  }
-  return undefined
 }
