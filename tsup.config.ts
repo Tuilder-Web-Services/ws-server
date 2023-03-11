@@ -12,6 +12,7 @@ export default defineConfig({
     compilerOptions: {
       moduleResolution: 'node',
       lib: ['es2022', 'node'],
+      allowSyntheticDefaultImports: true,
     }
   },
 })

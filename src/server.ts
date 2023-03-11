@@ -4,6 +4,8 @@ import * as ipaddr from 'ipaddr.js'
 import { nanoid } from 'nanoid'
 import { Message } from './message'
 import { IWsRoute } from './router'
+import { Subject } from 'rxjs';
+import { IncomingMessage } from 'http';
 
 type TWsRoute<TData = any> = new (client: any, message: any) => IWsRoute<TData>;
 
@@ -16,6 +18,7 @@ export interface IWsClient {
   socket: WebSocket,
   sessionId?: string,
   ipAddress?: string
+  host?: string
   subscribedTo: string[]
 }
 
@@ -36,13 +39,20 @@ export class WsServer {
     this.server.on('connection', async (socket, req) => this.onConnection(socket, req))
   }
 
-  private onConnection(socket: WebSocket, req: any) {
+  public clientAdded: Subject<IWsClient>   = new Subject<IWsClient>()
+  public clientRemoved: Subject<IWsClient> = new Subject<IWsClient>()
+
+  private onConnection(socket: WebSocket, req: IncomingMessage) {
     const ip = getIpFromConnection(req.socket)
+
+    // get host name from req, replacing any non-alphanumeric characters with an underscore
+    const host = (req.headers.host ?? 'localhost').replace(/[^a-z0-9]/gi, '_').toLowerCase()
 
     const client: IWsClient = {
       id: nanoid(),
       socket,
       ipAddress: ip,
+      host,
       subscribedTo: []
     }
 
@@ -56,6 +66,9 @@ export class WsServer {
 
     socket.on('error', () => { this.removeClient(client) })
     socket.on('close', () => { this.removeClient(client) })
+
+    this.clientAdded.next(client)
+
   }
 
   private handleIncoming(client: IWsClient, message: Message) {
@@ -70,6 +83,7 @@ export class WsServer {
   private removeClient(client: IWsClient) {
     client.socket.close()
     this.clients.delete(client)
+    this.clientRemoved.next(client)
   }
 }
 
