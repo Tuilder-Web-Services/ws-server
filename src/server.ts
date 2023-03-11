@@ -1,6 +1,6 @@
 import WebSocket, { ServerOptions, WebSocketServer } from 'ws';
 import { Socket } from 'net'
-import * as ipaddr from 'ipaddr.js'
+import { isValid, parse, IPv6 } from 'ipaddr.js'
 import { nanoid } from 'nanoid'
 import { Message } from './message'
 import { IWsRoute } from './router'
@@ -89,11 +89,11 @@ export class WsServer {
 
 const getIpFromConnection = (c: Socket) => {
   const ipStr = c.remoteAddress || ''
-  if (ipaddr.isValid(ipStr)) {
+  if (isValid(ipStr)) {
     try {
-      let addr = ipaddr.parse(ipStr)
-      if (ipaddr.IPv6.isValid(ipStr) && (addr as ipaddr.IPv6).isIPv4MappedAddress()) {
-        return (addr as ipaddr.IPv6).toIPv4Address().toString()
+      let addr = parse(ipStr)
+      if (IPv6.isValid(ipStr) && (addr as IPv6).isIPv4MappedAddress()) {
+        return (addr as IPv6).toIPv4Address().toString()
       }
       return addr.toNormalizedString()
     } catch (e) {
