@@ -46,7 +46,7 @@ export class WsServer {
     const ip = (req.headers['x-forwarded-for'] ?? req.socket.remoteAddress) as string
 
     // get host name from req, replacing any non-alphanumeric characters with an underscore
-    const host = (req.headers.host ?? 'localhost').replace(/[^a-z0-9]/gi, '_').toLowerCase()
+    const host = (req.headers.host ?? 'localhost').toLowerCase()
 
     const client: IWsClient = {
       id: nanoid(),
