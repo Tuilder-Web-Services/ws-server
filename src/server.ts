@@ -1,16 +1,14 @@
 import WebSocket, { ServerOptions, WebSocketServer } from 'ws';
-import { Socket } from 'net'
-import { isValid, parse, IPv6 } from 'ipaddr.js'
 import { nanoid } from 'nanoid'
 import { Message } from './message'
 import { IWsRoute } from './router'
 import { Subject } from 'rxjs';
 import { IncomingMessage } from 'http';
 
-type TWsRoute<TData = any> = new (client: any, message: any) => IWsRoute<TData>;
+type TWsRoute<TClient extends IWsClient, TData = any> = new (client: any, message: any) => IWsRoute<TClient, TData>;
 
-export interface IWsServerOptions extends ServerOptions {
-  routes?: Record<string, TWsRoute>
+export interface IWsServerOptions<T extends IWsClient> extends ServerOptions {
+  routes?: Record<string, TWsRoute<T, any>>
 }
 
 export interface IWsClient {
@@ -22,25 +20,25 @@ export interface IWsClient {
   subscribedTo: string[]
 }
 
-export class WsServer {
+export class WsServer<T extends IWsClient> {
   
-  private readonly defaultOptions: IWsServerOptions = {
+  private readonly defaultOptions: IWsServerOptions<T> = {
     port: 4267,
     path: '/ws'
   }
 
-  options: IWsServerOptions
+  options: IWsServerOptions<T>
   server: WebSocketServer
-  clients: Set<IWsClient> = new Set()
+  clients: Set<T> = new Set()
 
-  constructor(options: IWsServerOptions = {}) {
+  constructor(options: IWsServerOptions<T> = {}) {
     this.options = { ...this.defaultOptions, ...options }
     this.server = new WebSocketServer(this.options)
     this.server.on('connection', async (socket, req) => this.onConnection(socket, req))
   }
 
-  public clientAdded: Subject<IWsClient>   = new Subject<IWsClient>()
-  public clientRemoved: Subject<IWsClient> = new Subject<IWsClient>()
+  public clientAdded  : Subject<T> = new Subject<T>()
+  public clientRemoved: Subject<T> = new Subject<T>()
 
   private onConnection(socket: WebSocket, req: IncomingMessage) {
     const ip = (req.headers['x-forwarded-for'] ?? req.socket.remoteAddress) as string
@@ -56,7 +54,7 @@ export class WsServer {
       subscribedTo: []
     }
 
-    this.clients.add(client)
+    this.clients.add(client as T)
 
     socket.send(new Message<boolean>({subject: 'Connected', data: true }).ToString())
 
@@ -67,7 +65,7 @@ export class WsServer {
     socket.on('error', () => { this.removeClient(client) })
     socket.on('close', () => { this.removeClient(client) })
 
-    this.clientAdded.next(client)
+    this.clientAdded.next(client as T)
 
   }
 
@@ -82,7 +80,7 @@ export class WsServer {
 
   private removeClient(client: IWsClient) {
     client.socket.close()
-    this.clients.delete(client)
-    this.clientRemoved.next(client)
+    this.clients.delete(client as T)
+    this.clientRemoved.next(client as T)
   }
 }

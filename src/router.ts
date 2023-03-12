@@ -2,9 +2,9 @@ import { Message, sendBack, sendBackError, sendMessage } from "./message"
 import { IWsClient } from "./server"
 import { nanoid } from 'nanoid'
 
-export interface IWsRoute<TData = any> {
+export interface IWsRoute<TClient extends IWsClient, TData = any> {
   message: Message<TData>;
-  client: IWsClient;
+  client: TClient;
   run(): void;
   respond(data: any): void;
   respondError(error: string): void;
@@ -12,10 +12,10 @@ export interface IWsRoute<TData = any> {
   inputData: TData;
 }
 
-export abstract class AbstractRoute<TData = any> implements IWsRoute<TData> {
+export abstract class AbstractRoute<TClient extends IWsClient, TData = any> implements IWsRoute<TClient, TData> {
   public message: Message<TData>
-  public client: IWsClient
-  constructor(c: IWsClient, m: Message<TData>) {
+  public client: TClient
+  constructor(c: TClient, m: Message<TData>) {
     this.message = m
     this.client = c
   }
