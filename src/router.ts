@@ -19,15 +19,15 @@ export abstract class AbstractRoute<TClient extends IWsClient, TData = any> impl
     private clientsMap: Map<string, TClient>) {
   }
   abstract run(): void
-  public respond(data: any): void {
-    sendBack(this.client, this.message, data)
+  public respond(data: any, client = this.client): void {
+    sendBack(client, this.message, data)
   }
-  public respondError(error: string): void {
+  public respondError(error: string, client = this.client): void {
     this.respond(false)
-    sendBackError(this.client, this.message, error)
+    sendBackError(client, this.message, error)
   }
-  public send(subject: string, data: any): void {
-    sendMessage(this.client, new Message({ id: nanoid(), subject, data, error: null }))
+  public send(subject: string, data: any, client = this.client): void {
+    sendMessage(client, new Message({ id: nanoid(), subject, data, error: null }))
   }
   public get inputData(): TData {
     return this.message.data
