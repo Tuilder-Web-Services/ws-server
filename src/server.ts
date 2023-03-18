@@ -5,7 +5,7 @@ import { IWsRoute } from './router'
 import { Subject } from 'rxjs';
 import { IncomingMessage } from 'http';
 
-type TWsRoute<TClient extends IWsClient, TData = any> = new (client: any, message: any) => IWsRoute<TClient, TData>;
+type TWsRoute<TClient extends IWsClient, TData = any> = new (client: any, message: any, clientsMap: any) => IWsRoute<TClient, TData>;
 
 export interface IWsServerOptions<T extends IWsClient> extends ServerOptions {
   routes?: Record<string, TWsRoute<T, any>>
@@ -30,6 +30,7 @@ export class WsServer<T extends IWsClient> {
   options: IWsServerOptions<T>
   server: WebSocketServer
   clients: Set<T> = new Set()
+  clientsMap: Map<string, T> = new Map()
 
   constructor(options: IWsServerOptions<T> = {}) {
     this.options = { ...this.defaultOptions, ...options }
@@ -55,6 +56,7 @@ export class WsServer<T extends IWsClient> {
     }
 
     this.clients.add(client as T)
+    this.clientsMap.set(client.id, client as T)
 
     socket.send(new Message<boolean>({subject: 'Connected', data: true }).ToString())
 
@@ -72,7 +74,7 @@ export class WsServer<T extends IWsClient> {
   private handleIncoming(client: IWsClient, message: Message) {
     const route = this.options.routes?.[message.subject]
     if (route) {
-      new route(client, message).run()
+      new route(client, message, this.clientsMap).run()
     } else {
       console.error('No route for subject', message.subject)
     }
@@ -81,6 +83,7 @@ export class WsServer<T extends IWsClient> {
   private removeClient(client: IWsClient) {
     client.socket.close()
     this.clients.delete(client as T)
+    this.clientsMap.delete(client.id)
     this.clientRemoved.next(client as T)
   }
 }

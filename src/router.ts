@@ -13,11 +13,10 @@ export interface IWsRoute<TClient extends IWsClient, TData = any> {
 }
 
 export abstract class AbstractRoute<TClient extends IWsClient, TData = any> implements IWsRoute<TClient, TData> {
-  public message: Message<TData>
-  public client: TClient
-  constructor(c: TClient, m: Message<TData>) {
-    this.message = m
-    this.client = c
+  constructor(
+    public client: TClient,
+    public message: Message<TData>,
+    private clientsMap: Map<string, TClient>) {
   }
   abstract run(): void
   public respond(data: any): void {
@@ -32,5 +31,11 @@ export abstract class AbstractRoute<TClient extends IWsClient, TData = any> impl
   }
   public get inputData(): TData {
     return this.message.data
+  }
+  public getClient(id: string): TClient | undefined {
+    return this.clientsMap.get(id)
+  }
+  public findClients(domain: string): TClient[] {
+    return Array.from(this.clientsMap.values()).filter(c => c.host === domain)    
   }
 }
