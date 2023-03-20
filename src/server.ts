@@ -5,7 +5,7 @@ import { IWsRoute } from './router'
 import { Subject } from 'rxjs';
 import { IncomingMessage } from 'http';
 
-type TWsRoute<TClient extends IWsClient, TData = any> = new (client: any, message: any, clientsMap: any) => IWsRoute<TClient, TData>;
+export type TWsRoute<TClient extends IWsClient, TData = any> = new (client: any, message: any, clientsMap: any) => IWsRoute<TClient, TData>;
 
 export interface IWsServerOptions<T extends IWsClient> extends ServerOptions {
   routes?: Record<string, TWsRoute<T, any>>
