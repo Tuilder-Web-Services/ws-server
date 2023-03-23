@@ -1,0 +1,1 @@
+export const stringify = (obj: any) => JSON.stringify(obj, (_key, value) => (value instanceof Set ? [...value] : value))

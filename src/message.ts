@@ -1,5 +1,6 @@
 import { nanoid } from 'nanoid'
 import { IWsClient } from './server'
+import { stringify } from './stringify'
 
 export interface IMessage<T> {
    id?: string
@@ -22,7 +23,7 @@ export class Message<T = any> {
    }
    public ToString(): string {
       const { id, subject, data, error } = this
-      return JSON.stringify({ id, subject, data, error})
+      return stringify({ id, subject, data, error})
    }
 }
 
