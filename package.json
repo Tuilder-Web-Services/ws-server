@@ -23,8 +23,8 @@
   ],
   "scripts": {
     "build": "tsup",
-    "watch": "npm run build -- --watch src",
-    "prepack": "npm run build"
+    "pub": "npm run build && npm publish --access public",
+    "watch": "npm run build -- --watch src"
   },
   "repository": {
     "type": "git",
@@ -43,7 +43,7 @@
     "typescript": "^4.9.5"
   },
   "peerDependencies": {
-    "nanoid": "^4.0.1",
+    "nanoid": "^3.3.6",
     "ws": "^8.12.1",
     "rxjs": "^7.8.0"
   }
