@@ -32,6 +32,8 @@ export class WsServer<T extends IWsClient> {
   clients: Set<T> = new Set()
   clientsMap: Map<string, T> = new Map()
 
+  routeMapByTenant: Map<string, Map<string, TWsRoute<T, any>>> | null = null
+
   constructor(options: IWsServerOptions<T> = {}) {
     this.options = { ...this.defaultOptions, ...options }
     this.server = new WebSocketServer(this.options)
@@ -72,7 +74,22 @@ export class WsServer<T extends IWsClient> {
   }
 
   private handleIncoming(client: IWsClient, message: Message) {
-    const route = this.options.routes?.[message.subject]
+    if (!this.routeMapByTenant) {
+      this.routeMapByTenant = new Map()
+      for (const [subject, route] of Object.entries(this.options.routes ?? {})) {
+        const tenant = new route(client, message, this.clientsMap).tenant
+        const tenantArray = Array.isArray(tenant) ? tenant : [tenant]
+        for (const tenant of tenantArray) {
+          let tenantMap = this.routeMapByTenant.get(tenant)
+          if (!tenantMap) {
+            tenantMap = new Map()
+            this.routeMapByTenant.set(tenant, tenantMap)
+          }
+          tenantMap.set(subject, route)
+        }
+      }
+    }
+    const route = this.routeMapByTenant.get(client.host ?? 'common')?.get(message.subject) ?? this.routeMapByTenant.get('common')?.get(message.subject)
     if (route) {
       new route(client, message, this.clientsMap).run()
     } else {

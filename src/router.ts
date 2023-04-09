@@ -3,6 +3,7 @@ import { IWsClient } from "./server"
 import { nanoid } from 'nanoid'
 
 export interface IWsRoute<TClient extends IWsClient, TData = any> {
+  tenant: 'common' | string | string[];
   message: Message<TData>;
   client: TClient;
   run(): void;
@@ -19,6 +20,7 @@ export abstract class AbstractRoute<TClient extends IWsClient, TData = any> impl
     private clientsMap: Map<string, TClient>) {
   }
   abstract run(): void
+  tenant = 'common'
   public respond(data: any, client = this.client): void {
     sendBack(client, this.message, data)
   }
