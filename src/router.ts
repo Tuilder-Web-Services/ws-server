@@ -22,11 +22,11 @@ export abstract class AbstractRoute<TClient extends IWsClient, TData = any> impl
   }
   abstract run(): void
   tenant = 'common'
+  catchAll = false
   public respond(data: any, client = this.client): void {
     sendBack(client, this.message, data)
   }
   public respondError(error: string, client = this.client): void {
-    this.respond(false)
     sendBackError(client, this.message, error)
   }
   public send(subject: string, data: any, client = this.client): void {
