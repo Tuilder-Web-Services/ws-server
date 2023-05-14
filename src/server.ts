@@ -46,8 +46,11 @@ export class WsServer<T extends IWsClient> {
   private onConnection(socket: WebSocket, req: IncomingMessage) {
     const ip = (req.headers['x-forwarded-for'] ?? req.socket.remoteAddress) as string
 
+    const isDev = process.env.END === 'dev'
+    const domainFromQueryString = req.url ? new URL (req.url).searchParams.get('domain') ?? null : null
+
     // get host name from req, replacing any non-alphanumeric characters with an underscore
-    const host = (req.headers.host ?? 'localhost').toLowerCase()
+    const host = isDev && domainFromQueryString ? domainFromQueryString : (req.headers.host ?? 'localhost').toLowerCase()
 
     const client: IWsClient = {
       id: nanoid(),
