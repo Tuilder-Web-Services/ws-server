@@ -33,6 +33,7 @@ export class WsServer<T extends IWsClient> {
   clientsMap: Map<string, T> = new Map()
 
   routeMapByTenant: Map<string, Map<string, TWsRoute<T, any>>> | null = null
+  catchAllRouteByTenant: Map<string, TWsRoute<T, any>>  = new Map()
 
   constructor(options: IWsServerOptions<T> = {}) {
     this.options = { ...this.defaultOptions, ...options }
@@ -80,7 +81,8 @@ export class WsServer<T extends IWsClient> {
     if (!this.routeMapByTenant) {
       this.routeMapByTenant = new Map()
       for (const [subject, route] of Object.entries(this.options.routes ?? {})) {
-        const tenant = new route(client, message, this.clientsMap).tenant
+        const routeObj = new route(client, message, this.clientsMap)
+        const tenant = routeObj.tenant
         const tenantArray = Array.isArray(tenant) ? tenant : [tenant]
         for (const tenant of tenantArray) {
           let tenantMap = this.routeMapByTenant.get(tenant)
@@ -89,6 +91,9 @@ export class WsServer<T extends IWsClient> {
             this.routeMapByTenant.set(tenant, tenantMap)
           }
           tenantMap.set(subject, route)
+          if (routeObj.catchAll) {
+            this.catchAllRouteByTenant.set(tenant, route)
+          }
         }
       }
     }
@@ -96,7 +101,12 @@ export class WsServer<T extends IWsClient> {
     if (route) {
       new route(client, message, this.clientsMap).run()
     } else {
-      console.error('No route for subject', message.subject)
+      const catchAllRoute = this.catchAllRouteByTenant.get(client.host ?? 'common')
+      if (catchAllRoute) {
+        new catchAllRoute(client, message, this.clientsMap).run()
+      } else {
+        console.error('No route for:', message)
+      }
     }
   }
 
