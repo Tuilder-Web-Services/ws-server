@@ -47,7 +47,7 @@ export class WsServer<T extends IWsClient> {
   private onConnection(socket: WebSocket, req: IncomingMessage) {
     const ip = (req.headers['x-forwarded-for'] ?? req.socket.remoteAddress) as string
 
-    const isDev = process.env.END === 'dev'
+    const isDev = process.env.ENV === 'dev'
     const queryString = req.url?.split('?')?.[1]??''
     const queryParamMap = new Map<string, string>(queryString.split('&').map(param => param.split('=') as [string, string]))
     const domainFromQueryString = req.url ? queryParamMap.get('domain') ?? null : null
